@@ -67,11 +67,7 @@ class Files():
 		for f in self.files:
 			if f['project'] == project and f['name'] == name:
 
-				#print "Avant : " + f['content'][:start]
-				#print "Apres : " + f['content'][end:]
-
 				f['content'] = f['content'][:start] + f['content'][end:]
-				#s = s[:pos] + s[(pos+1):]
 
 				return True
 
@@ -130,7 +126,7 @@ if not os.path.isfile(xmlFile):
 	print "File `" + xmlFile + "` doesn't exist..."
 	usage()
 elif os.path.splitext(xmlFile)[1] != '.xml':
-	print "File `" + xmlFile + "` isn't an xml..."
+	print "File `" + xmlFile + "` isn't xml..."
 	usage()
 
 # We close the xml tag because it's still open
@@ -164,9 +160,9 @@ for i in range(0, maximum):
 
 	# Deletion
 	elif root[i].attrib.get('K') == "ST":
+
 		currentProject  = root[i][0].text
 		currentFile     = root[i][3].text
-
 		cursorStart     = int(root[i][1].text)
 		cursorEnd       = int(root[i][4].text)
 
