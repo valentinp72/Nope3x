@@ -1,17 +1,48 @@
 # coding: utf-8
 
+# ---
+# --- IMPORTS
+# ---
+
 import xml.etree.ElementTree as ET
 import os
+import sys
 
-tree = ET.parse('data.xml')
-root = tree.getroot()
+# ---
+# --- FUNCTIONS
+# ---
 
+# Returns the content of the file f
+def readAllFile(f):
+	fd = open(f, "r")
+	data = ""
 
-# Default location where projects and files will be located:
-globalPath = "output/"
+	for line in fd.readlines():
+		data += line
 
-maximum = len(root)
-#maximum = 20
+	fd.close()
+	return data
+
+# Usage of this program
+def usage():
+	print "Usage: " + sys.argv[0] + " <XML file>"
+	sys.exit(1)
+
+# Correct the specials characters inside content
+def correctSpecialCharacters(content):
+	new = content
+
+	new = new.replace('\\n', '\n')
+	new = new.replace('\\t', '	')
+
+	new = new.replace("$€n€$".decode('utf-8'), '\\n')
+	new = new.replace("$€t€$".decode('utf-8'), '\\t')
+
+	return new
+
+# ---
+# --- CLASSES
+# ---
 
 class Files():
 
@@ -80,13 +111,40 @@ class Files():
 		print self.files
 
 
+# ---
+# --- MAIN PROGRAM
+# ---
 
-def correctSpecialCharacters(content):
-	return content.replace('\\n', '\n').replace('\\t', '	')
+# Checks if we have an argument (ie: a xml file)
+if len(sys.argv) != 2:
+	usage()
 
+xmlFile = sys.argv[1]
+
+# Checks if the xml file exists and is xml
+if not os.path.isfile(xmlFile):
+	print "File `" + xmlFile + "` doesn't exist..."
+	usage()
+elif os.path.splitext(xmlFile)[1] != '.xml':
+	print "File `" + xmlFile + "` isn't an xml..."
+	usage()
+
+# We close the xml tag because it's still open
+data = readAllFile(xmlFile) + "</TRACE>"
+root = ET.fromstring(data)
+
+maximum = len(root)
+
+# Default location where projects and files will be located:
+globalPath = "output/"
+
+# List of all files
 files = Files()
 
+# We loop through all the xml file
 for i in range(0, maximum):
+
+	# Insertion
 	if root[i].attrib.get('K') == "IT":
 
 		currentProject  = root[i][0].text
@@ -101,6 +159,7 @@ for i in range(0, maximum):
 
 		files.insert(currentProject, currentFile, content, currentPosition)
 
+	# Deletion
 	elif root[i].attrib.get('K') == "ST":
 		currentProject  = root[i][0].text
 		currentFile     = root[i][3].text
@@ -114,5 +173,5 @@ for i in range(0, maximum):
 		files.remove(currentProject, currentFile, cursorStart, cursorEnd)
 
 
-files.printAll()
+# We close the files (and save them)
 files.closeAll()
