@@ -5,8 +5,9 @@
 # ---
 
 import xml.etree.ElementTree as ET
-import os
+import time
 import sys
+import os
 
 # ---
 # --- FUNCTIONS
@@ -115,6 +116,9 @@ class Files():
 # --- MAIN PROGRAM
 # ---
 
+# How long the build took
+startTime = time.clock()
+
 # Checks if we have an argument (ie: a xml file)
 if len(sys.argv) != 2:
 	usage()
@@ -153,7 +157,6 @@ for i in range(0, maximum):
 
 		content = correctSpecialCharacters(root[i][1].text)
 
-
 		if not files.isOpened(currentProject, currentFile):
 			files.open(currentProject, currentFile)
 
@@ -175,3 +178,7 @@ for i in range(0, maximum):
 
 # We close the files (and save them)
 files.closeAll()
+
+# How long the build took
+endTime = time.clock()
+print "Done (in " + str(endTime - startTime) + "s)."

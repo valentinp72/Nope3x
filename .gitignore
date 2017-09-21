@@ -1,5 +1,6 @@
 *.xml
 output/
+traces
 
 
 # Byte-compiled / optimized / DLL files
