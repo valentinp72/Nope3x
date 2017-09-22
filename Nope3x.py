@@ -5,6 +5,7 @@
 # ---
 
 import xml.etree.ElementTree as ET
+import shutil
 import time
 import sys
 import os
@@ -85,6 +86,10 @@ class Files():
 		if not self.isOpened(project, name):
 			self.files.append({'project': project, 'name': name, 'content': ""})
 
+	# Delete a project
+	def deleteProject(self, project):
+		self.files[:] = [element for element in self.files if element.get('project') != project]
+
 	# Close all files (Warning: this opens the file, write all contents on it, and close it)
 	def closeAll(self):
 		global globalPath
@@ -138,14 +143,20 @@ maximum = len(root)
 # Default location where projects and files will be located:
 globalPath = "output/"
 
+# We remove the output folder and it's content:
+if os.path.exists(os.path.dirname(globalPath)):
+	shutil.rmtree(globalPath)
+
 # List of all files
 files = Files()
 
 # We loop through all the xml file
 for i in range(0, maximum):
 
+	attrib = root[i].attrib.get('K')
+
 	# Insertion
-	if root[i].attrib.get('K') == "IT":
+	if attrib == "IT":
 
 		currentProject  = root[i][0].text
 		currentFile     = root[i][2].text
@@ -159,7 +170,7 @@ for i in range(0, maximum):
 		files.insert(currentProject, currentFile, content, currentPosition)
 
 	# Deletion
-	elif root[i].attrib.get('K') == "ST":
+	elif attrib == "ST":
 
 		currentProject  = root[i][0].text
 		currentFile     = root[i][3].text
@@ -171,6 +182,12 @@ for i in range(0, maximum):
 
 		files.remove(currentProject, currentFile, cursorStart, cursorEnd)
 
+	# Delete a project
+	elif attrib == "SP":
+
+		currentProject  = root[i][0].text
+
+		files.deleteProject(currentProject)
 
 # We close the files (and save them)
 files.closeAll()
