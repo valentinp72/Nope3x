@@ -90,6 +90,11 @@ class Files():
 	def deleteProject(self, project):
 		self.files[:] = [element for element in self.files if element.get('project') != project]
 
+	# Delete a file
+	def deleteFile(self, project, name):
+		self.files[:] = [element for element in self.files if element.get('project') != project or element.get('name') != name]
+
+
 	# Close all files (Warning: this opens the file, write all contents on it, and close it)
 	def closeAll(self):
 		global globalPath
@@ -188,6 +193,16 @@ for i in range(0, maximum):
 		currentProject  = root[i][0].text
 
 		files.deleteProject(currentProject)
+
+	# Delete a file
+	elif attrib == "SF":
+
+		currentProject  = root[i][0].text
+		currentFile     = root[i][2].text
+
+		files.deleteFile(currentProject, currentFile)
+		print "We need to delete " + currentProject + "/" + currentFile
+
 
 # We close the files (and save them)
 files.closeAll()
