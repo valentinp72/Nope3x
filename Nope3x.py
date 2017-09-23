@@ -201,7 +201,6 @@ for i in range(0, maximum):
 		currentFile     = root[i][2].text
 
 		files.deleteFile(currentProject, currentFile)
-		print "We need to delete " + currentProject + "/" + currentFile
 
 
 # We close the files (and save them)
