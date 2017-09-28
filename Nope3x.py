@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # coding: utf-8
 
 # ---
@@ -5,6 +6,7 @@
 # ---
 
 import xml.etree.ElementTree as ET
+from optparse import OptionParser
 import shutil
 import time
 import sys
@@ -24,11 +26,6 @@ def readAllFile(f):
 
 	fd.close()
 	return data
-
-# Usage of this program
-def usage():
-	print "Usage: " + sys.argv[0] + " <XML file>"
-	sys.exit(1)
 
 # Correct the specials characters inside content
 def correctSpecialCharacters(content):
@@ -126,18 +123,30 @@ class Files():
 startTime = time.clock()
 
 # Checks if we have an argument (ie: a xml file)
-if len(sys.argv) != 2:
-	usage()
 
-xmlFile = sys.argv[1]
+parser = OptionParser(usage="usage: %prog [options] <XML file>", version="%prog 1.1")
+
+parser.add_option(
+	"-f",
+	"--force",
+	action="store_true",
+	dest="force_flag",
+	default=False,
+	help="force to rebuild all output folder"
+)
+
+(options, args) = parser.parse_args()
+
+if len(args) != 1:
+	parser.error("wrong number of arguments")
+
+xmlFile = args.pop()
 
 # Checks if the xml file exists and is xml
 if not os.path.isfile(xmlFile):
-	print "File `" + xmlFile + "` doesn't exist..."
-	usage()
+	parser.error("File `" + xmlFile + "` doesn't exist...")
 elif os.path.splitext(xmlFile)[1] != '.xml':
-	print "File `" + xmlFile + "` isn't xml..."
-	usage()
+	parser.error("File `" + xmlFile + "` isn't xml...")
 
 # We close the xml tag because it's still open
 data = readAllFile(xmlFile) + "</TRACE>"
@@ -148,8 +157,8 @@ maximum = len(root)
 # Default location where projects and files will be located:
 globalPath = "output/"
 
-# We remove the output folder and it's content:
-if os.path.exists(os.path.dirname(globalPath)):
+# We remove the output folder and it's content:	
+if options.force_flag and os.path.exists(os.path.dirname(globalPath)):
 	shutil.rmtree(globalPath)
 
 # List of all files
