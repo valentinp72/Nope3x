@@ -27,6 +27,14 @@ def readAllFile(f):
 	fd.close()
 	return data
 
+# Returns the xml file inside xmlFolder
+def findXML(xmlFolder):
+	for root, dirs, files in os.walk(xmlFolder):
+		for file in files:
+			if file.endswith('.xml'):
+				return xmlFolder + "/" + file
+	return ""
+
 # Correct the specials characters inside content
 def correctSpecialCharacters(content):
 	new = content
@@ -122,10 +130,8 @@ class Files():
 # How long the build took
 startTime = time.clock()
 
-# Checks if we have an argument (ie: a xml file)
-
-parser = OptionParser(usage="usage: %prog [options] <XML file>", version="%prog 1.1")
-
+# ARGUMENTS
+parser = OptionParser(usage="usage: %prog [options] <working_folder/session_name>", version="%prog 1.1")
 parser.add_option(
 	"-f",
 	"--force",
@@ -134,19 +140,18 @@ parser.add_option(
 	default=False,
 	help="force to rebuild all output folder"
 )
-
 (options, args) = parser.parse_args()
 
 if len(args) != 1:
 	parser.error("wrong number of arguments")
 
-xmlFile = args.pop()
+xmlFolder   = os.path.normpath(args.pop()) # The folder which contains the xml file
+xmlFile     = findXML(xmlFolder)           # The complete path to the xml file
+sessionName = os.path.basename(xmlFolder)  # The name of the session
 
-# Checks if the xml file exists and is xml
-if not os.path.isfile(xmlFile):
-	parser.error("File `" + xmlFile + "` doesn't exist...")
-elif os.path.splitext(xmlFile)[1] != '.xml':
-	parser.error("File `" + xmlFile + "` isn't xml...")
+# Checks if the xml file exists
+if not xmlFile:
+	parser.error("Folder `" + xmlFolder + "` doesn't exists or doesn't contains any .xml.")
 
 # We close the xml tag because it's still open
 data = readAllFile(xmlFile) + "</TRACE>"
@@ -155,9 +160,10 @@ root = ET.fromstring(data)
 maximum = len(root)
 
 # Default location where projects and files will be located:
-globalPath = "output/"
+globalPath  = "output/"
+globalPath += sessionName + "/"
 
-# We remove the output folder and it's content:	
+# We remove the output folder and it's content if the force_flag is set:
 if options.force_flag and os.path.exists(os.path.dirname(globalPath)):
 	shutil.rmtree(globalPath)
 
